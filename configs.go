@@ -1,4 +1,4 @@
-package main
+package coil
 
 // APIServiceConfig is a global struct passed to all services
 type APIServiceConfig struct {

@@ -1,14 +1,14 @@
-# 🌀What is Coil?
+# Coil Config
 
 A small and handy Go configuration composition package built on Viper and Cobra. Coil makes it easy to define and stack your configurations with composed structs. Your config settings are instantly available as CLI flags or config files.
 
-## 📦 Install
+## ➕ Install
 
 ```bash
 go get github.com/cvlsoft/coil
 ```
 
-## Prebuilt Configurations
+## 📦 Prebuilt Configurations
 
 Coil ships with a number of very basic and useful configurations. These out-of-the-box options cover basic functions like API keys, database connections, and authentication etc:
 
@@ -39,6 +39,12 @@ type Config struct {
 type MyCustomConfig struct {
 	FooBar string `type:"string" name:"foo_bar" default:"static" desc:"Foo bar value"`
 }
+
+// NewConfig is a factory generator for your configuration
+func NewConfig() *Config {
+	c := coil.NewConfig(&Config{})
+	return c.(*Config)
+}
 ```
 This simple declaration will allow you to define your YAML config file like so:
 ```yaml
@@ -62,6 +68,6 @@ go run main.go --foo_bar=dynamic
 
 We welcome contributions from the community to expand the list of predefined types. If you have a configuration type that you think would be useful for others, please submit a pull request with your contribution.
 
-## License
+## 📃 License
 
 Coil is released under the MIT. See [LICENSE.txt](https://github.com/cvlsoft/coil/blob/master/LICENSE.txt)
