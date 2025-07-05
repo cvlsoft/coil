@@ -1,6 +1,6 @@
-# Coil Config
+# Coil
 
-A small and handy Go configuration composition package built on Viper and Cobra. Coil makes it easy to define and stack your configurations with composed structs. Your config settings are instantly available as CLI flags or config files.
+Coil is a lightweight Go package for configuration management, built on top of Viper and Cobra. It simplifies configuration handling by allowing you to compose and layer settings using Go structs. Configuration values are automatically exposed as both CLI flags and config file options, providing flexible deployment options for your applications.
 
 ## ➕ Install
 
