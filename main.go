@@ -15,11 +15,6 @@ type Configer interface {
 	getParser() *viper.Viper
 }
 
-// AuthConfig represents a composable struct for db connections
-type AuthConfig struct {
-	JWTPhrase string `type:"string" name:"jwt_phrase" default:"82uushdf8h2398ru09sduf" desc:"Phrase for generating tokens"`
-}
-
 // Config is a standard definition for config interfaces
 type Config struct {
 	viper *viper.Viper
@@ -32,44 +27,54 @@ func (c *Config) getParser() *viper.Viper {
 
 // generate adds generators to the register
 func (c *Config) generate() {
-	pflag.String("config", "", "Path for a configuration file to load")
+	// Create a local flagset for the config flag
+	fs := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	fs.String("config", "", "Path for a configuration file to load")
+	// Add to global command line if not already defined
+	if pflag.CommandLine.Lookup("config") == nil {
+		pflag.CommandLine.AddFlagSet(fs)
+	}
 	c.viper = CreateViper()
 }
 
 // defineFlagsFromStruct performs a deep recurse into the specified object
-// to find tags and declare them against viper
-func defineFlagsFromStruct(t reflect.Type) {
+// to find tags and declare them against a flagset
+func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if field.Type.Kind() == reflect.Struct {
-			defineFlagsFromStruct(field.Type)
+			defineFlagsFromStruct(field.Type, fs)
+			continue
+		}
+		flagName := field.Tag.Get("name")
+		if flagName == "" {
 			continue
 		}
 		flagType := field.Tag.Get("type")
 		// Define flags based on their types
 		switch flagType {
 		case "string":
-			pflag.String(field.Tag.Get("name"), field.Tag.Get("default"), field.Tag.Get("desc"))
+			fs.String(flagName, field.Tag.Get("default"), field.Tag.Get("desc"))
 		case "int":
 			i, err := strconv.Atoi(field.Tag.Get("default"))
 			if err == nil {
-				pflag.Int64(field.Tag.Get("name"), int64(i), field.Tag.Get("desc"))
+				fs.Int64(flagName, int64(i), field.Tag.Get("desc"))
 			}
 		case "bool":
 			var val bool = false
 			if field.Tag.Get("default") == "true" {
 				val = true
 			}
-			pflag.Bool(field.Tag.Get("name"), val, field.Tag.Get("desc"))
+			fs.Bool(flagName, val, field.Tag.Get("desc"))
 		case "float32":
-			i, err := strconv.Atoi(field.Tag.Get("default"))
+			i, err := strconv.ParseFloat(field.Tag.Get("default"), 32)
 			if err == nil {
-				pflag.Float32(field.Tag.Get("name"), float32(i), field.Tag.Get("desc"))
+				fs.Float32(flagName, float32(i), field.Tag.Get("desc"))
 			}
 		case "float64":
-			i, err := strconv.Atoi(field.Tag.Get("default"))
+			i, err := strconv.ParseFloat(field.Tag.Get("default"), 64)
 			if err == nil {
-				pflag.Float64(field.Tag.Get("name"), float64(i), field.Tag.Get("desc"))
+				fs.Float64(flagName, i, field.Tag.Get("desc"))
 			}
 		}
 	}
@@ -92,6 +97,7 @@ func setPropertiesFromFlags(vp reflect.Value, viper *viper.Viper) {
 		case reflect.Int:
 			v.Field(i).SetInt(viper.GetInt64(field.Tag.Get("name")))
 		case reflect.Float32:
+			v.Field(i).SetFloat(viper.GetFloat64(field.Tag.Get("name")))
 		case reflect.Float64:
 			v.Field(i).SetFloat(viper.GetFloat64(field.Tag.Get("name")))
 		}
@@ -104,8 +110,26 @@ func setPropertiesFromFlags(vp reflect.Value, viper *viper.Viper) {
 }
 
 // NewConfig generates a new configuration setup
-func NewConfig(c Configer) Configer {
-	defineFlagsFromStruct(reflect.TypeOf(c).Elem())
+func NewConfig(c Configer, merge ...bool) Configer {
+	fs := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	defineFlagsFromStruct(reflect.TypeOf(c).Elem(), fs)
+	// Only merge local flagset into global command line if requested
+	shouldMerge := true // Default to true to maintain original behavior
+	if len(merge) > 0 {
+		shouldMerge = merge[0]
+	}
+	if shouldMerge {
+		pflag.CommandLine.AddFlagSet(fs)
+	}
+	c.generate()
+	setPropertiesFromFlags(reflect.ValueOf(c), c.getParser())
+	return c
+}
+
+// NewConfigWithFlagSet generates a new configuration setup with a custom flagset
+// This is useful for testing or when you want to use a specific flagset
+func NewConfigWithFlagSet(c Configer, fs *pflag.FlagSet) Configer {
+	defineFlagsFromStruct(reflect.TypeOf(c).Elem(), fs)
 	c.generate()
 	setPropertiesFromFlags(reflect.ValueOf(c), c.getParser())
 	return c
@@ -120,6 +144,27 @@ func CreateViper() (v *viper.Viper) {
 	pflag.Parse()
 	v.BindPFlags(pflag.CommandLine)
 	// Override values if they exist already
+	if v.GetString("config") != "" {
+		v.SetConfigFile(v.GetString("config"))
+		if err := v.ReadInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+				panic("Could not find configuration file")
+			} else {
+				fmt.Println(err)
+				panic("Could not parse configuration file")
+			}
+		}
+	}
+	return
+}
+
+// CreateViperWithFlagSet creates a parser instance with a custom flagset
+// This is useful for testing
+func CreateViperWithFlagSet(fs *pflag.FlagSet) (v *viper.Viper) {
+	v = viper.New()
+	v.AutomaticEnv()
+	fs.Parse([]string{}) // Parse with empty args for testing
+	v.BindPFlags(fs)
 	if v.GetString("config") != "" {
 		v.SetConfigFile(v.GetString("config"))
 		if err := v.ReadInConfig(); err != nil {
