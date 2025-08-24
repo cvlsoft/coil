@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -55,6 +56,8 @@ func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
 		switch flagType {
 		case "string":
 			fs.String(flagName, field.Tag.Get("default"), field.Tag.Get("desc"))
+		case "[]string":
+			fs.StringSlice(flagName, strings.Split(field.Tag.Get("default"), ","), field.Tag.Get("desc"))
 		case "int":
 			i, err := strconv.Atoi(field.Tag.Get("default"))
 			if err == nil {
