@@ -26,6 +26,24 @@ func (c *Config) getParser() *viper.Viper {
 	return c.viper
 }
 
+// HasConfig checks if a specific config type is embedded in the Config struct
+func (c *Config) HasConfig(checkType any) bool {
+	// Get the type we're looking for
+	targetType := reflect.TypeOf(checkType)
+	if targetType.Kind() == reflect.Ptr {
+		targetType = targetType.Elem()
+	}
+	// Check all fields in the Config struct
+	configType := reflect.TypeOf(*c)
+	for i := 0; i < configType.NumField(); i++ {
+		field := configType.Field(i)
+		if field.Type == targetType {
+			return true
+		}
+	}
+	return false
+}
+
 // generate adds generators to the register
 func (c *Config) generate() {
 	// Create a local flagset for the config flag
