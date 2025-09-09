@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -96,6 +97,11 @@ func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
 			i, err := strconv.ParseFloat(field.Tag.Get("default"), 64)
 			if err == nil {
 				fs.Float64(flagName, i, field.Tag.Get("desc"))
+			}
+		case "duration":
+			duration, err := time.ParseDuration(field.Tag.Get("default"))
+			if err == nil {
+				fs.Duration(flagName, duration, field.Tag.Get("desc"))
 			}
 		}
 	}
