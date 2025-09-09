@@ -1,13 +1,16 @@
 package coil
 
+import "time"
+
 // APIServiceConfig is a global struct passed to all services
 type APIServiceConfig struct {
-	Version string `type:"string" name:"version" default:"1.0.0" desc:"API version (follows semver)"`
-	Name    string `type:"string" name:"name" default:"service-api" desc:"Default name of the service"`
-	Build   string `type:"string" name:"build" default:"UNSPECIFIED" desc:"Build version"`
-	Host    string `type:"string" name:"host" default:"localhost" desc:"Server hostname to bind to"`
-	APIURL  string `type:"string" name:"api_url" default:"" desc:"The URL to the API"`
-	Port    int    `type:"int" name:"port" default:"80" desc:"Server port to bind to"`
+	Version string        `type:"string" name:"version" default:"1.0.0" desc:"API version (follows semver)"`
+	Name    string        `type:"string" name:"name" default:"service-api" desc:"Default name of the service"`
+	Build   string        `type:"string" name:"build" default:"UNSPECIFIED" desc:"Build version"`
+	Host    string        `type:"string" name:"host" default:"localhost" desc:"Server hostname to bind to"`
+	URL     string        `type:"string" name:"api_url" default:"" desc:"The URL to the API"`
+	Port    int           `type:"int" name:"port" default:"80" desc:"Server port to bind to"`
+	Timeout time.Duration `type:"duration" name:"timeout" default:"15s" desc:"Timeout for any connection i.e. 10s"`
 }
 
 // DatabaseConfig represents a composable struct for db connections
