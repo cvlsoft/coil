@@ -23,3 +23,24 @@ type DatabaseConfig struct {
 	DBDebug bool   `type:"string" name:"dbdebug" default:"" desc:"Enable database debug mode"`
 	DBPort  int    `type:"int" name:"dbport" default:"5432" desc:"Database port number"`
 }
+
+// LogConfig represents a composable struct for logging
+type LogConfig struct {
+	// Core logging settings
+	Level  string `type:"string" name:"log_level" default:"info" desc:"Log level (trace, debug, info, warn, error, fatal)"`
+	Format string `type:"string" name:"log_format" default:"json" desc:"Log format (json, text, logfmt)"`
+
+	// Output configuration
+	Output     string `type:"string" name:"log_output" default:"stdout" desc:"Log output destination (stdout, stderr, file)"`
+	FilePath   string `type:"string" name:"log_file_path" default:"./logs/app.log" desc:"Path to log file when output is 'file'"`
+	MaxSize    int    `type:"int" name:"log_max_size" default:"100" desc:"Maximum size in megabytes before rotation"`
+	MaxBackups int    `type:"int" name:"log_max_backups" default:"3" desc:"Maximum number of old log files to retain"`
+	MaxAge     int    `type:"int" name:"log_max_age" default:"28" desc:"Maximum number of days to retain old log files"`
+	Compress   bool   `type:"bool" name:"log_compress" default:"false" desc:"Whether to compress rotated log files"`
+
+	// Field configuration
+	StaticFields string `type:"string" name:"log_static_fields" default:"" desc:"Static fields to include in all logs (JSON format)"`
+	ServiceName  string `type:"string" name:"log_service_name" default:"" desc:"Service name to include in logs"`
+	Environment  string `type:"string" name:"log_environment" default:"" desc:"Environment name (dev, staging, prod)"`
+	InstanceID   string `type:"string" name:"log_instance_id" default:"" desc:"Instance/container ID to include in logs"`
+}
