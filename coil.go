@@ -60,15 +60,35 @@ func (c *Config) generate() {
 // defineFlagsFromStruct performs a deep recurse into the specified object
 // to find tags and declare them against a flagset
 func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
+	defineFlagsFromStructWithPrefix(t, fs, "")
+}
+
+// defineFlagsFromStructWithPrefix performs a deep recurse into the specified object
+// to find tags and declare them against a flagset, with an optional prefix
+func defineFlagsFromStructWithPrefix(t reflect.Type, fs *pflag.FlagSet, prefix string) {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if field.Type.Kind() == reflect.Struct {
-			defineFlagsFromStruct(field.Type, fs)
+			// Check if this struct field has a prefix tag
+			fieldPrefix := field.Tag.Get("prefix")
+			newPrefix := prefix
+			if fieldPrefix != "" {
+				if newPrefix != "" {
+					newPrefix = newPrefix + "_" + fieldPrefix
+				} else {
+					newPrefix = fieldPrefix
+				}
+			}
+			defineFlagsFromStructWithPrefix(field.Type, fs, newPrefix)
 			continue
 		}
 		flagName := field.Tag.Get("name")
 		if flagName == "" {
 			continue
+		}
+		// Apply prefix to flag name
+		if prefix != "" {
+			flagName = prefix + "_" + flagName
 		}
 		flagType := field.Tag.Get("type")
 		// Define flags based on their types
@@ -110,23 +130,85 @@ func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
 // setPropertiesFromFlags performs a deep recurse into the specified object
 // to retrieve and bind them to the struct
 func setPropertiesFromFlags(vp reflect.Value, viper *viper.Viper) {
+	setPropertiesFromFlagsWithPrefix(vp, viper, "")
+}
+
+// setPropertiesFromFlagsWithPrefix performs a deep recurse into the specified object
+// to retrieve and bind them to the struct, with an optional prefix
+func setPropertiesFromFlagsWithPrefix(vp reflect.Value, viper *viper.Viper, prefix string) {
 	v := vp.Elem()
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		switch field.Type.Kind() {
 		case reflect.Struct:
-			setPropertiesFromFlags(v.Field(i).Addr(), viper)
+			// Check if this struct field has a prefix tag
+			fieldPrefix := field.Tag.Get("prefix")
+			newPrefix := prefix
+			if fieldPrefix != "" {
+				if newPrefix != "" {
+					newPrefix = newPrefix + "_" + fieldPrefix
+				} else {
+					newPrefix = fieldPrefix
+				}
+			}
+			setPropertiesFromFlagsWithPrefix(v.Field(i).Addr(), viper, newPrefix)
 		case reflect.String:
-			v.Field(i).SetString(viper.GetString(field.Tag.Get("name")))
+			flagName := field.Tag.Get("name")
+			if prefix != "" && flagName != "" {
+				flagName = prefix + "_" + flagName
+			}
+			val := viper.GetString(flagName)
+			if val == "" {
+				val = field.Tag.Get("default")
+			}
+			v.Field(i).SetString(val)
 		case reflect.Bool:
-			v.Field(i).SetBool(viper.GetBool(field.Tag.Get("name")))
+			flagName := field.Tag.Get("name")
+			if prefix != "" && flagName != "" {
+				flagName = prefix + "_" + flagName
+			}
+			if viper.IsSet(flagName) {
+				v.Field(i).SetBool(viper.GetBool(flagName))
+			} else {
+				v.Field(i).SetBool(field.Tag.Get("default") == "true")
+			}
 		case reflect.Int:
-			v.Field(i).SetInt(viper.GetInt64(field.Tag.Get("name")))
+			flagName := field.Tag.Get("name")
+			if prefix != "" && flagName != "" {
+				flagName = prefix + "_" + flagName
+			}
+			if viper.IsSet(flagName) {
+				v.Field(i).SetInt(viper.GetInt64(flagName))
+			} else {
+				if defaultVal, err := strconv.ParseInt(field.Tag.Get("default"), 10, 64); err == nil {
+					v.Field(i).SetInt(defaultVal)
+				}
+			}
 		case reflect.Float32:
-			v.Field(i).SetFloat(viper.GetFloat64(field.Tag.Get("name")))
+			flagName := field.Tag.Get("name")
+			if prefix != "" && flagName != "" {
+				flagName = prefix + "_" + flagName
+			}
+			if viper.IsSet(flagName) {
+				v.Field(i).SetFloat(viper.GetFloat64(flagName))
+			} else {
+				if defaultVal, err := strconv.ParseFloat(field.Tag.Get("default"), 32); err == nil {
+					v.Field(i).SetFloat(defaultVal)
+				}
+			}
 		case reflect.Float64:
-			v.Field(i).SetFloat(viper.GetFloat64(field.Tag.Get("name")))
+			flagName := field.Tag.Get("name")
+			if prefix != "" && flagName != "" {
+				flagName = prefix + "_" + flagName
+			}
+			if viper.IsSet(flagName) {
+				v.Field(i).SetFloat(viper.GetFloat64(flagName))
+			} else {
+				if defaultVal, err := strconv.ParseFloat(field.Tag.Get("default"), 64); err == nil {
+					v.Field(i).SetFloat(defaultVal)
+				}
+			}
 		}
 	}
 	// Finally detect if a parse method exists and trigger it

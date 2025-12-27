@@ -64,6 +64,47 @@ You can also use any of the configuration format supported by Viper (JSON, TOML,
 go run main.go --foo_bar=dynamic
 ```
 
+## 🔀 Using Prefixes for Multiple Instances
+
+When you need to use the same configuration type multiple times (e.g., multiple database connections), use the `prefix` tag to avoid naming collisions:
+
+```go
+type Config struct {
+    coil.Config
+    PrimaryDB coil.DatabaseConfig `prefix:"primary"`
+    ReplicaDB coil.DatabaseConfig `prefix:"replica"`
+}
+```
+
+This allows you to configure each instance independently via environment variables:
+
+```bash
+# Primary database
+export PRIMARY_DBHOST=primary.example.com
+export PRIMARY_DBPORT=5432
+export PRIMARY_DBUSER=primary_user
+
+# Replica database
+export REPLICA_DBHOST=replica.example.com
+export REPLICA_DBPORT=5433
+export REPLICA_DBUSER=replica_user
+```
+
+Or via CLI flags:
+
+```bash
+go run main.go --primary_dbhost=primary.example.com --replica_dbhost=replica.example.com
+```
+
+Or in your config file:
+
+```yaml
+primary_dbhost: primary.example.com
+primary_dbport: 5432
+replica_dbhost: replica.example.com
+replica_dbport: 5433
+```
+
 ## 🌐 Community Contributions
 
 We welcome contributions from the community to expand the list of predefined types. If you have a configuration type that you think would be useful for others, please submit a pull request with your contribution.
