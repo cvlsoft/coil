@@ -5,7 +5,7 @@ Coil is a lightweight Go package for configuration management, built on top of V
 ## ➕ Install
 
 ```bash
-go get github.com/cvlsoft/coil
+go get github.com/cvlstack/coil
 ```
 
 ## 📦 Prebuilt Configurations
@@ -24,7 +24,7 @@ We hope to expand this list of predefined types with community contributions.
 package config
 
 import (
-	configs "github.com/cvlsoft/coil"
+	configs "github.com/cvlstack/coil"
 )
 
 // Config represents your app's local config
@@ -111,4 +111,4 @@ We welcome contributions from the community to expand the list of predefined typ
 
 ## 📃 License
 
-Coil is released under the MIT. See [LICENSE.txt](https://github.com/cvlsoft/coil/blob/master/LICENSE.txt)
+Coil is released under the MIT. See [LICENSE.txt](https://github.com/cvlstack/coil/blob/master/LICENSE.txt)
