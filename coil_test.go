@@ -39,9 +39,13 @@ func TestConfigStructure(t *testing.T) {
 	// Debug: Print the type and value
 	t.Logf("Config type: %T", cfg)
 	t.Logf("Config value: %+v", cfg)
-	// Test that we can access MyCustomConfig fields and it has the default value
+	// Test that we can access MyCustomConfig fields and it has the default
+	// value
 	if cfg.FooBar != "static" {
-		t.Errorf("FooBar field should have default value 'static', got %q", cfg.FooBar)
+		t.Errorf(
+			"FooBar field should have default value 'static', got %q",
+			cfg.FooBar,
+		)
 	}
 }
 
@@ -62,7 +66,11 @@ func TestConfigWithEnvironmentVariable(t *testing.T) {
 	cfg := NewConfigTest()
 	// Check if environment variable overrides default
 	if cfg.FooBar != testValue {
-		t.Errorf("FooBar should be set from environment variable: got %q, want %q", cfg.FooBar, testValue)
+		t.Errorf(
+			"FooBar should be set from environment variable: got %q, want %q",
+			cfg.FooBar,
+			testValue,
+		)
 	}
 }
 
@@ -159,7 +167,11 @@ func TestConfigWithPrefix(t *testing.T) {
 
 	// Verify primary DB config
 	if cfg.PrimaryDB.DBHost != "primary-host.example.com" {
-		t.Errorf("PrimaryDB.DBHost = %q, want %q", cfg.PrimaryDB.DBHost, "primary-host.example.com")
+		t.Errorf(
+			"PrimaryDB.DBHost = %q, want %q",
+			cfg.PrimaryDB.DBHost,
+			"primary-host.example.com",
+		)
 	}
 	if cfg.PrimaryDB.DBPort != 5433 {
 		t.Errorf("PrimaryDB.DBPort = %d, want %d", cfg.PrimaryDB.DBPort, 5433)
@@ -167,7 +179,11 @@ func TestConfigWithPrefix(t *testing.T) {
 
 	// Verify replica DB config
 	if cfg.ReplicaDB.DBHost != "replica-host.example.com" {
-		t.Errorf("ReplicaDB.DBHost = %q, want %q", cfg.ReplicaDB.DBHost, "replica-host.example.com")
+		t.Errorf(
+			"ReplicaDB.DBHost = %q, want %q",
+			cfg.ReplicaDB.DBHost,
+			"replica-host.example.com",
+		)
 	}
 	if cfg.ReplicaDB.DBPort != 5434 {
 		t.Errorf("ReplicaDB.DBPort = %d, want %d", cfg.ReplicaDB.DBPort, 5434)
@@ -189,10 +205,18 @@ func TestConfigWithPrefixDefaults(t *testing.T) {
 
 	// Both should have the default value when no env var is set
 	if cfg.PrimaryDB.DBHost != "localhost" {
-		t.Errorf("PrimaryDB.DBHost = %q, want default %q", cfg.PrimaryDB.DBHost, "localhost")
+		t.Errorf(
+			"PrimaryDB.DBHost = %q, want default %q",
+			cfg.PrimaryDB.DBHost,
+			"localhost",
+		)
 	}
 	if cfg.ReplicaDB.DBHost != "localhost" {
-		t.Errorf("ReplicaDB.DBHost = %q, want default %q", cfg.ReplicaDB.DBHost, "localhost")
+		t.Errorf(
+			"ReplicaDB.DBHost = %q, want default %q",
+			cfg.ReplicaDB.DBHost,
+			"localhost",
+		)
 	}
 }
 
@@ -211,12 +235,12 @@ type AllTypesConfig struct {
 }
 
 type AllTypesStruct struct {
-	StringField  string  `type:"string" name:"test_string" default:"default_string" desc:"A string field"`
-	IntField     int     `type:"int" name:"test_int" default:"42" desc:"An int field"`
-	BoolFieldT   bool    `type:"bool" name:"test_bool_true" default:"true" desc:"A bool field defaulting to true"`
-	BoolFieldF   bool    `type:"bool" name:"test_bool_false" default:"false" desc:"A bool field defaulting to false"`
-	Float32Field float32 `type:"float32" name:"test_float32" default:"3.14" desc:"A float32 field"`
-	Float64Field float64 `type:"float64" name:"test_float64" default:"2.718281828" desc:"A float64 field"`
+	StringField  string  `type:"string"  name:"test_string"     default:"default_string" desc:"A string field"`
+	IntField     int     `type:"int"     name:"test_int"        default:"42"             desc:"An int field"`
+	BoolFieldT   bool    `type:"bool"    name:"test_bool_true"  default:"true"           desc:"A bool field defaulting to true"`
+	BoolFieldF   bool    `type:"bool"    name:"test_bool_false" default:"false"          desc:"A bool field defaulting to false"`
+	Float32Field float32 `type:"float32" name:"test_float32"    default:"3.14"           desc:"A float32 field"`
+	Float64Field float64 `type:"float64" name:"test_float64"    default:"2.718281828"    desc:"A float64 field"`
 }
 
 func NewAllTypesConfig() *AllTypesConfig {
@@ -226,7 +250,14 @@ func NewAllTypesConfig() *AllTypesConfig {
 
 func TestAllFieldTypeDefaults(t *testing.T) {
 	// Clear any env vars that might interfere
-	envVars := []string{"TEST_STRING", "TEST_INT", "TEST_BOOL_TRUE", "TEST_BOOL_FALSE", "TEST_FLOAT32", "TEST_FLOAT64"}
+	envVars := []string{
+		"TEST_STRING",
+		"TEST_INT",
+		"TEST_BOOL_TRUE",
+		"TEST_BOOL_FALSE",
+		"TEST_FLOAT32",
+		"TEST_FLOAT64",
+	}
 	origVals := make(map[string]string)
 	for _, env := range envVars {
 		origVals[env] = os.Getenv(env)
@@ -242,7 +273,11 @@ func TestAllFieldTypeDefaults(t *testing.T) {
 
 	// Test string default
 	if cfg.TypesStruct.StringField != "default_string" {
-		t.Errorf("StringField = %q, want %q", cfg.TypesStruct.StringField, "default_string")
+		t.Errorf(
+			"StringField = %q, want %q",
+			cfg.TypesStruct.StringField,
+			"default_string",
+		)
 	}
 
 	// Test int default
@@ -259,13 +294,23 @@ func TestAllFieldTypeDefaults(t *testing.T) {
 	}
 
 	// Test float32 default
-	if cfg.TypesStruct.Float32Field < 3.13 || cfg.TypesStruct.Float32Field > 3.15 {
-		t.Errorf("Float32Field = %f, want approximately %f", cfg.TypesStruct.Float32Field, 3.14)
+	if cfg.TypesStruct.Float32Field < 3.13 ||
+		cfg.TypesStruct.Float32Field > 3.15 {
+		t.Errorf(
+			"Float32Field = %f, want approximately %f",
+			cfg.TypesStruct.Float32Field,
+			3.14,
+		)
 	}
 
 	// Test float64 default
-	if cfg.TypesStruct.Float64Field < 2.71 || cfg.TypesStruct.Float64Field > 2.72 {
-		t.Errorf("Float64Field = %f, want approximately %f", cfg.TypesStruct.Float64Field, 2.718281828)
+	if cfg.TypesStruct.Float64Field < 2.71 ||
+		cfg.TypesStruct.Float64Field > 2.72 {
+		t.Errorf(
+			"Float64Field = %f, want approximately %f",
+			cfg.TypesStruct.Float64Field,
+			2.718281828,
+		)
 	}
 }
 
@@ -293,7 +338,11 @@ func TestAllFieldTypesFromEnv(t *testing.T) {
 	cfg := NewAllTypesConfig()
 
 	if cfg.TypesStruct.StringField != "env_string" {
-		t.Errorf("StringField = %q, want %q", cfg.TypesStruct.StringField, "env_string")
+		t.Errorf(
+			"StringField = %q, want %q",
+			cfg.TypesStruct.StringField,
+			"env_string",
+		)
 	}
 	if cfg.TypesStruct.IntField != 100 {
 		t.Errorf("IntField = %d, want %d", cfg.TypesStruct.IntField, 100)
@@ -304,11 +353,21 @@ func TestAllFieldTypesFromEnv(t *testing.T) {
 	if cfg.TypesStruct.BoolFieldF != true {
 		t.Errorf("BoolFieldF = %v, want %v", cfg.TypesStruct.BoolFieldF, true)
 	}
-	if cfg.TypesStruct.Float32Field < 1.4 || cfg.TypesStruct.Float32Field > 1.6 {
-		t.Errorf("Float32Field = %f, want approximately %f", cfg.TypesStruct.Float32Field, 1.5)
+	if cfg.TypesStruct.Float32Field < 1.4 ||
+		cfg.TypesStruct.Float32Field > 1.6 {
+		t.Errorf(
+			"Float32Field = %f, want approximately %f",
+			cfg.TypesStruct.Float32Field,
+			1.5,
+		)
 	}
-	if cfg.TypesStruct.Float64Field < 9.98 || cfg.TypesStruct.Float64Field > 10.0 {
-		t.Errorf("Float64Field = %f, want approximately %f", cfg.TypesStruct.Float64Field, 9.99)
+	if cfg.TypesStruct.Float64Field < 9.98 ||
+		cfg.TypesStruct.Float64Field > 10.0 {
+		t.Errorf(
+			"Float64Field = %f, want approximately %f",
+			cfg.TypesStruct.Float64Field,
+			9.99,
+		)
 	}
 }
 
@@ -359,7 +418,11 @@ func TestNestedStructDefaults(t *testing.T) {
 		t.Errorf("L2Field = %q, want %q", cfg.Level1.Level2.L2Field, "level2")
 	}
 	if cfg.Level1.Level2.Level3.L3Field != "level3" {
-		t.Errorf("L3Field = %q, want %q", cfg.Level1.Level2.Level3.L3Field, "level3")
+		t.Errorf(
+			"L3Field = %q, want %q",
+			cfg.Level1.Level2.Level3.L3Field,
+			"level3",
+		)
 	}
 }
 
@@ -386,10 +449,18 @@ func TestNestedStructFromEnv(t *testing.T) {
 		t.Errorf("L1Field = %q, want %q", cfg.Level1.L1Field, "env_level1")
 	}
 	if cfg.Level1.Level2.L2Field != "env_level2" {
-		t.Errorf("L2Field = %q, want %q", cfg.Level1.Level2.L2Field, "env_level2")
+		t.Errorf(
+			"L2Field = %q, want %q",
+			cfg.Level1.Level2.L2Field,
+			"env_level2",
+		)
 	}
 	if cfg.Level1.Level2.Level3.L3Field != "env_level3" {
-		t.Errorf("L3Field = %q, want %q", cfg.Level1.Level2.Level3.L3Field, "env_level3")
+		t.Errorf(
+			"L3Field = %q, want %q",
+			cfg.Level1.Level2.Level3.L3Field,
+			"env_level3",
+		)
 	}
 }
 
@@ -401,7 +472,7 @@ type NestedPrefixConfig struct {
 
 type OuterStruct struct {
 	OuterField string      `type:"string" name:"field" default:"outer_default" desc:"Outer field"`
-	Inner      InnerStruct `prefix:"inner"`
+	Inner      InnerStruct `                                                                      prefix:"inner"`
 }
 
 type InnerStruct struct {
@@ -414,7 +485,8 @@ func NewNestedPrefixConfig() *NestedPrefixConfig {
 }
 
 func TestNestedPrefixes(t *testing.T) {
-	// Test that nested prefixes combine correctly: outer_field and outer_inner_field
+	// Test that nested prefixes combine correctly: outer_field and
+	// outer_inner_field
 	envVars := map[string]string{
 		"OUTER_FIELD":       "outer_from_env",
 		"OUTER_INNER_FIELD": "inner_from_env",
@@ -433,10 +505,18 @@ func TestNestedPrefixes(t *testing.T) {
 	cfg := NewNestedPrefixConfig()
 
 	if cfg.Outer.OuterField != "outer_from_env" {
-		t.Errorf("OuterField = %q, want %q", cfg.Outer.OuterField, "outer_from_env")
+		t.Errorf(
+			"OuterField = %q, want %q",
+			cfg.Outer.OuterField,
+			"outer_from_env",
+		)
 	}
 	if cfg.Outer.Inner.InnerField != "inner_from_env" {
-		t.Errorf("InnerField = %q, want %q", cfg.Outer.Inner.InnerField, "inner_from_env")
+		t.Errorf(
+			"InnerField = %q, want %q",
+			cfg.Outer.Inner.InnerField,
+			"inner_from_env",
+		)
 	}
 }
 
@@ -456,10 +536,18 @@ func TestNestedPrefixDefaults(t *testing.T) {
 	cfg := NewNestedPrefixConfig()
 
 	if cfg.Outer.OuterField != "outer_default" {
-		t.Errorf("OuterField = %q, want default %q", cfg.Outer.OuterField, "outer_default")
+		t.Errorf(
+			"OuterField = %q, want default %q",
+			cfg.Outer.OuterField,
+			"outer_default",
+		)
 	}
 	if cfg.Outer.Inner.InnerField != "inner_default" {
-		t.Errorf("InnerField = %q, want default %q", cfg.Outer.Inner.InnerField, "inner_default")
+		t.Errorf(
+			"InnerField = %q, want default %q",
+			cfg.Outer.Inner.InnerField,
+			"inner_default",
+		)
 	}
 }
 
@@ -490,7 +578,10 @@ func TestFieldsWithoutTagsIgnored(t *testing.T) {
 		t.Errorf("WithTag = %q, want %q", cfg.NoTagStruct.WithTag, "tagged")
 	}
 	if cfg.NoTagStruct.WithoutTag != "" {
-		t.Errorf("WithoutTag = %q, want empty string (zero value)", cfg.NoTagStruct.WithoutTag)
+		t.Errorf(
+			"WithoutTag = %q, want empty string (zero value)",
+			cfg.NoTagStruct.WithoutTag,
+		)
 	}
 }
 
@@ -529,10 +620,18 @@ func TestMixedPrefixAndNonPrefix(t *testing.T) {
 	cfg := NewMixedPrefixConfig()
 
 	if cfg.Regular.Value != "regular_env" {
-		t.Errorf("Regular.Value = %q, want %q", cfg.Regular.Value, "regular_env")
+		t.Errorf(
+			"Regular.Value = %q, want %q",
+			cfg.Regular.Value,
+			"regular_env",
+		)
 	}
 	if cfg.Prefixed.Value != "prefixed_env" {
-		t.Errorf("Prefixed.Value = %q, want %q", cfg.Prefixed.Value, "prefixed_env")
+		t.Errorf(
+			"Prefixed.Value = %q, want %q",
+			cfg.Prefixed.Value,
+			"prefixed_env",
+		)
 	}
 }
 
@@ -543,8 +642,8 @@ type EmptyDefaultConfig struct {
 }
 
 type EmptyDefaultsStruct struct {
-	EmptyString string `type:"string" name:"empty_string" default:"" desc:"Empty string default"`
-	EmptyInt    int    `type:"int" name:"empty_int" default:"0" desc:"Zero int default"`
+	EmptyString string `type:"string" name:"empty_string" default:""  desc:"Empty string default"`
+	EmptyInt    int    `type:"int"    name:"empty_int"    default:"0" desc:"Zero int default"`
 }
 
 func NewEmptyDefaultConfig() *EmptyDefaultConfig {
@@ -568,7 +667,10 @@ func TestEmptyDefaults(t *testing.T) {
 	cfg := NewEmptyDefaultConfig()
 
 	if cfg.EmptyDefaults.EmptyString != "" {
-		t.Errorf("EmptyString = %q, want empty string", cfg.EmptyDefaults.EmptyString)
+		t.Errorf(
+			"EmptyString = %q, want empty string",
+			cfg.EmptyDefaults.EmptyString,
+		)
 	}
 	if cfg.EmptyDefaults.EmptyInt != 0 {
 		t.Errorf("EmptyInt = %d, want 0", cfg.EmptyDefaults.EmptyInt)
@@ -628,7 +730,11 @@ func TestEnvVarCaseSensitivity(t *testing.T) {
 	cfg := NewConfig(&CaseCfg{}, false)
 	caseCfg := cfg.(*CaseCfg)
 	if caseCfg.Case.MixedCase != "uppercase_env" {
-		t.Errorf("MixedCase = %q, want %q", caseCfg.Case.MixedCase, "uppercase_env")
+		t.Errorf(
+			"MixedCase = %q, want %q",
+			caseCfg.Case.MixedCase,
+			"uppercase_env",
+		)
 	}
 }
 

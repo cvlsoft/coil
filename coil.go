@@ -63,9 +63,14 @@ func defineFlagsFromStruct(t reflect.Type, fs *pflag.FlagSet) {
 	defineFlagsFromStructWithPrefix(t, fs, "")
 }
 
-// defineFlagsFromStructWithPrefix performs a deep recurse into the specified object
+// defineFlagsFromStructWithPrefix performs a deep recurse into the specified
+// object
 // to find tags and declare them against a flagset, with an optional prefix
-func defineFlagsFromStructWithPrefix(t reflect.Type, fs *pflag.FlagSet, prefix string) {
+func defineFlagsFromStructWithPrefix(
+	t reflect.Type,
+	fs *pflag.FlagSet,
+	prefix string,
+) {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if field.Type.Kind() == reflect.Struct {
@@ -96,7 +101,11 @@ func defineFlagsFromStructWithPrefix(t reflect.Type, fs *pflag.FlagSet, prefix s
 		case "string":
 			fs.String(flagName, field.Tag.Get("default"), field.Tag.Get("desc"))
 		case "[]string":
-			fs.StringSlice(flagName, strings.Split(field.Tag.Get("default"), ","), field.Tag.Get("desc"))
+			fs.StringSlice(
+				flagName,
+				strings.Split(field.Tag.Get("default"), ","),
+				field.Tag.Get("desc"),
+			)
 		case "int":
 			i, err := strconv.Atoi(field.Tag.Get("default"))
 			if err == nil {
@@ -133,9 +142,14 @@ func setPropertiesFromFlags(vp reflect.Value, viper *viper.Viper) {
 	setPropertiesFromFlagsWithPrefix(vp, viper, "")
 }
 
-// setPropertiesFromFlagsWithPrefix performs a deep recurse into the specified object
+// setPropertiesFromFlagsWithPrefix performs a deep recurse into the specified
+// object
 // to retrieve and bind them to the struct, with an optional prefix
-func setPropertiesFromFlagsWithPrefix(vp reflect.Value, viper *viper.Viper, prefix string) {
+func setPropertiesFromFlagsWithPrefix(
+	vp reflect.Value,
+	viper *viper.Viper,
+	prefix string,
+) {
 	v := vp.Elem()
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
@@ -152,7 +166,11 @@ func setPropertiesFromFlagsWithPrefix(vp reflect.Value, viper *viper.Viper, pref
 					newPrefix = fieldPrefix
 				}
 			}
-			setPropertiesFromFlagsWithPrefix(v.Field(i).Addr(), viper, newPrefix)
+			setPropertiesFromFlagsWithPrefix(
+				v.Field(i).Addr(),
+				viper,
+				newPrefix,
+			)
 		case reflect.String:
 			flagName := field.Tag.Get("name")
 			if prefix != "" && flagName != "" {
@@ -235,7 +253,8 @@ func NewConfig(c Configer, merge ...bool) Configer {
 	return c
 }
 
-// NewConfigWithFlagSet generates a new configuration setup with a custom flagset
+// NewConfigWithFlagSet generates a new configuration setup with a custom
+// flagset
 // This is useful for testing or when you want to use a specific flagset
 func NewConfigWithFlagSet(c Configer, fs *pflag.FlagSet) Configer {
 	defineFlagsFromStruct(reflect.TypeOf(c).Elem(), fs)
