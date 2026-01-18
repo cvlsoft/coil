@@ -111,4 +111,4 @@ We welcome contributions from the community to expand the list of predefined typ
 
 ## 📃 License
 
-Coil is released under the MIT. See [LICENSE.txt](https://github.com/cvlstack/coil/blob/master/LICENSE.txt)
+Coil is released under the Apache License 2.0. See [LICENSE](LICENSE) for details.
